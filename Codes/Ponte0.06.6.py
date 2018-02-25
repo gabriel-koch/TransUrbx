@@ -7,7 +7,7 @@ Created on Sun Feb 11 00:48:55 2018
 
 
 
-##Bibliotecas
+##Módulos
 import pandas as pd
 from matplotlib import pyplot as plt
 import datetime as dt
@@ -17,23 +17,18 @@ import numpy as np
 
 ##Entrada de dados
 file_x = '000'
-#data = open('C:\\Users\\danielmota\\Documents\\GitHub\\Database\\TransUrb\\' + file_x + '.txt','r')
-data = open('C:\\Users\\Gabriel\\Documents\\GitHub\\Database\\TransUrb\\' + file_x + '.txt','r')
 
-##Tranasformar dados em lista
-lst_data_txt = list(set(data.readlines()))
+data = pd.read_csv('C:\\Users\\Gabriel\\Documents\\GitHub\\Database\\TransUrb\\' + file_x + '.csv',      
+                   names = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude'],\
+                   dtype = {'Latitude':np.float64, 'Longitude':np.float64,\
+                            'Linha':np.str, u'Veículo':np.str})
+#data = pd.read_csv('C:\\Users\\danielmota\\Documents\\GitHub\\Database\\TransUrb\\' + file_x + '.csv',      
+#                   names = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude'],\
+#                   dtype = {'Latitude':np.float64, 'Longitude':np.float64,\
+#                            'Linha':np.str, u'Veículo':np.str})
 
-##Transformar lista em Dataframe
-df1 = pd.Series(lst_data_txt).str.split(',', expand = True)
-df1 = df1.sort_values(by = [0,1])
-del lst_data_txt
-
-##Nomear colunas
-df1.columns = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude']
-
-##Lat Lon para float
-df1.Latitude = df1.Latitude.astype(float)
-df1.Longitude = df1.Longitude.astype(float)
+##Tirar duplicadas
+df1 = data.drop_duplicates()
 
 '''---------'''
 
@@ -50,7 +45,7 @@ del lst_time_pattern
 '''---------'''
 
 ##Intervalo de tempo em min
-interval_x = 15
+interval_x = 10
 
 ##Criar lista de 00:00 até 23:59 de 10 em 10min
 m = 0
@@ -78,33 +73,43 @@ def haversine(lon1, lat1, lon2, lat2):
     r = 6371
     return c * r
 
+##Função interpolar os NaN's certos
+def interp(df4, limit):
+    d = df4.notna().rolling(limit + 1).agg(any).fillna(1)
+    d = pd.concat({
+            i: d.shift(-i).fillna(1)
+            for i in range(limit + 1)
+            }).prod(level=1)
+
+    return df4.interpolate(limit=limit).where(d.astype(bool))
+
 '''---------'''
 
 ##Filtros
-line_a = '813'
-line_b = '33581'
+line_a = ''
+line_b = '34132'
+vehicle = '12161' 
 
 '''---------'''
 
 ##Filtrando por linha
 #df2 = df1[(df1['Linha'] == line_a) | (df1['Linha'] == line_b)]
 df2 = df1[(df1[u'Veículo'] == '12161')]
-#del df1
+del df1
 ##Contagem de NaN's
 dictx = {}
-
 
 ##Iterar todos os veículos nas linhas
 for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
       
     ##Tratando os dados
-    df_filtred = df_filtred.reset_index().groupby(['Linha', u'Veículo', 'Hora']).mean().reset_index(level=-1)
+    df_filtred = df_filtred.reset_index().groupby(['Linha', u'Veículo',\
+                                       'Hora']).mean().reset_index(level=-1)
     df_filtred = df_filtred.reset_index(level=['Linha',u'Veículo'])
     df_filtred = df_filtred.set_index(['Hora'])
     df3 = df_time.join(df_filtred)
     df3 = df3[~df3.index.duplicated(keep='first')]
     dictx[vehicle] = df3['Linha'].notna().sum()
-
     
     ##Criando Dataframe para calcular intervalo de 10 min
     df4 = df3.assign(Intervalo=lst_time_pattern10)
@@ -113,27 +118,8 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
     '''---------'''
     
     ##Arrumando os NaN's 
-    def interp(df4, limit):
-        d = df4.notna().rolling(limit + 1).agg(any).fillna(1)
-        d = pd.concat({
-                i: d.shift(-i).fillna(1)
-                for i in range(limit + 1)
-                }).prod(level=1)
-
-        return df4.interpolate(limit=limit).where(d.astype(bool))
-
     df4.pipe(interp, 5)
-
-
-    
-    
-    
-    
-    
-    df_fw = df4.interpolate(limit=60)
-    df_bk = df4.interpolate(limit=60,limit_direction='backward')
-    df_fltx = df_fw.where(df_bk.notna())
-    df4 = df_fltx.fillna(value = 0)
+    df4 = df4.fillna(value = 0)
 
     '''---------'''
     
@@ -157,34 +143,34 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
 
     '''---------'''
     
-#    ##Gráfico de posição
-#    ##Filtro para tirar a posição 0,0
-#    df_scatter = df4[(df4['Latitude'] != 0) | (df4['Longitude'] != 0)]
-#    fig, ax = plt.subplots()
-#    colors = {line_a:'red', line_b:'blue'}
-#    ax.scatter(df_scatter['Latitude'],df_scatter['Longitude'],\
-#               c=df_scatter['Linha'].apply(lambda x: colors[x]),\
-#               s=1)
-#    plt.title(u'Trajeto do veículo: ' + vehicle)
-#    plt.show()
+    ##Gráfico de posição
+    ##Filtro para tirar a posição 0,0
+    df_scatter = df4[(df4['Latitude'] != 0) | (df4['Longitude'] != 0)]
+    fig, ax = plt.subplots()
+    colors = {line_a:'red', line_b:'blue'}
+    ax.scatter(df_scatter['Latitude'],df_scatter['Longitude'],\
+               c=df_scatter['Linha'].apply(lambda x: colors[x]),\
+               s=1)
+    plt.title(u'Trajeto do veículo: ' + vehicle)
+    plt.show()
 
     '''---------'''
 
     ##Gráfico de velocidade
     ##Intervalo do gráfico
-    interval_ga = '00:00'
-    interval_gb = '23:57'
-    df4 = df4[interval_ga:interval_gb]
+    interval_xa = '00:00'
+    interval_xb = '23:57'
     ##Média para o intervalo
     df_line = df4.groupby('Intervalo')['Velocidade'].mean()
     df_line = df_line.reset_index()##ARRUMAR A HORA
-    df_line['Intervalo'] = pd.to_datetime(df_line['Intervalo'], format = '%H:%M')
-    fig = df_line.plot(x='Intervalo',y='Velocidade', title = u'Velocidade média do veículo: ' + vehicle,\
+    df_line['Intervalo'] = pd.to_datetime(df_line['Intervalo'], format = '%H:%M').dt.time
+    df_line.plot(x='Intervalo',y='Velocidade',\
+                       title = u'Velocidade média do veículo: ' + vehicle,\
                        figsize = (14,8))
+    plt.xlim(interval_xa, interval_xb)
+    plt.ylim()
     plt.show()
-    '''---------'''
-    
-    
+    '''---------''' 
     
     ##DDO
     #del lst_speed_temp, df_filtred, df_line, df_scatter, colors
