@@ -45,7 +45,7 @@ del lst_time_pattern
 '''---------'''
 
 ##Intervalo de tempo em min
-interval_x = 10
+interval_x = 30
 
 ##Criar lista de 00:00 até 23:59 de 10 em 10min
 m = 0
@@ -62,8 +62,9 @@ for i in range(24):
 
 '''---------'''
 
-##Função haversine
+
 def haversine(lon1, lat1, lon2, lat2):        
+    '''Função haversine'''
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
     dlon = lon2 - lon1 
@@ -73,8 +74,9 @@ def haversine(lon1, lat1, lon2, lat2):
     r = 6371
     return c * r
 
-##Função interpolar os NaN's certos
+
 def interp(df4, limit):
+    '''Função interpolar os NaN's certos'''
     d = df4.notna().rolling(limit + 1).agg(any).fillna(1)
     d = pd.concat({
             i: d.shift(-i).fillna(1)
@@ -87,15 +89,15 @@ def interp(df4, limit):
 
 ##Filtros
 line_a = ''
-line_b = '34132'
-vehicle = '12161' 
+line_b = ''
+vehicle = '11138' 
 
 '''---------'''
 
 ##Filtrando por linha
 #df2 = df1[(df1['Linha'] == line_a) | (df1['Linha'] == line_b)]
-df2 = df1[(df1[u'Veículo'] == '12161')]
-del df1
+df2 = df1[(df1[u'Veículo'] == vehicle)]
+#del df1
 ##Contagem de NaN's
 dictx = {}
 
@@ -116,10 +118,16 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
     del df4['index']
     
     '''---------'''
-    
-    ##Arrumando os NaN's 
+
+    ##Arrumando os NaN's
+#    is_duplicate = df4.duplicated(subset=['Latitude','Longitude'])
+#    df4_1 = df4.Latitude.where(~is_duplicate)
+#    df4_2 = df4.Longitude.where(~is_duplicate)
+#    df4 = df4.drop(columns=['Latitude','Longitude'])
+#    df4 = pd.concat([df4, df4_1,df4_2], axis=1)
     df4.pipe(interp, 5)
     df4 = df4.fillna(value = 0)
+
 
     '''---------'''
     
@@ -143,16 +151,16 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
 
     '''---------'''
     
-    ##Gráfico de posição
-    ##Filtro para tirar a posição 0,0
-    df_scatter = df4[(df4['Latitude'] != 0) | (df4['Longitude'] != 0)]
-    fig, ax = plt.subplots()
-    colors = {line_a:'red', line_b:'blue'}
-    ax.scatter(df_scatter['Latitude'],df_scatter['Longitude'],\
-               c=df_scatter['Linha'].apply(lambda x: colors[x]),\
-               s=1)
-    plt.title(u'Trajeto do veículo: ' + vehicle)
-    plt.show()
+#    ##Gráfico de posição
+#    ##Filtro para tirar a posição 0,0
+#    df_scatter = df4[(df4['Latitude'] != 0) | (df4['Longitude'] != 0)]
+#    fig, ax = plt.subplots()
+#    colors = {line_a:'red', line_b:'blue'}
+#    ax.scatter(df_scatter['Latitude'],df_scatter['Longitude'],\
+#               c=df_scatter['Linha'].apply(lambda x: colors[x]),\
+#               s=1)
+#    plt.title(u'Trajeto do veículo: ' + vehicle)
+#    plt.show()
 
     '''---------'''
 
