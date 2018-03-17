@@ -95,9 +95,9 @@ vehicle = '11138'
 '''---------'''
 
 ##Filtrando por linha
-#df2 = df1[(df1['Linha'] == line_a) | (df1['Linha'] == line_b)]
+df2 = df1[(df1['Linha'] == line_a) | (df1['Linha'] == line_b)]
 df2 = df1[(df1[u'Veículo'] == vehicle)]
-#del df1
+del df1
 ##Contagem de NaN's
 dictx = {}
 
@@ -135,10 +135,10 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
     lst_speed_temp=[]
     lst_speed_temp.append(0.0)
     for i in range(len(df4)-1):
-        lat1 = df4.iat[i,2]
-        lon1 = df4.iat[i,3]
-        lat2 = df4.iat[(i+1),2]
-        lon2 = df4.iat[(i+1),3]
+        lat1 = df4.iat[i,3]
+        lon1 = df4.iat[i,4]
+        lat2 = df4.iat[(i+1),3]
+        lon2 = df4.iat[(i+1),4]
         speed_temp_x = 3.6*((haversine(lon1, lat1, lon2, lat2))*1000)/60
         if speed_temp_x < 80:     
             lst_speed_temp.append(speed_temp_x)
@@ -151,8 +151,8 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
 
     '''---------'''
     
-#    ##Gráfico de posição
-#    ##Filtro para tirar a posição 0,0
+    ##Gráfico de posição
+    ##Filtro para tirar a posição 0,0
 #    df_scatter = df4[(df4['Latitude'] != 0) | (df4['Longitude'] != 0)]
 #    fig, ax = plt.subplots()
 #    colors = {line_a:'red', line_b:'blue'}
@@ -181,29 +181,8 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
     '''---------''' 
     
     ##DDO
-    #del lst_speed_temp, df_filtred, df_line, df_scatter, colors
+    del lst_speed_temp, df_filtred, df_line, '''df_scatter''', colors
 
 ##DDO
-#del lst_time_pattern10, df_time, df2, df3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+del lst_time_pattern10, df_time, df2, df3
 
