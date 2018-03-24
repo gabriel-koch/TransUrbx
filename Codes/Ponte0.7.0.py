@@ -16,7 +16,7 @@ import numpy as np
 
 
 ##Entrada de dados
-file_x = '000'
+file_x = '001'
 
 data = pd.read_csv('C:\\Users\\Gabriel\\Documents\\GitHub\\Database\\TransUrb\\' + file_x + '.csv',      
                    names = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude'],\
@@ -97,7 +97,7 @@ vehicle = '11138'
 ##Filtrando por linha
 df2 = df1[(df1['Linha'] == line_a) | (df1['Linha'] == line_b)]
 df2 = df1[(df1[u'Veículo'] == vehicle)]
-del df1
+#del df1
 ##Contagem de NaN's
 dictx = {}
 
@@ -181,8 +181,8 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
     '''---------''' 
     
     ##DDO
-    del lst_speed_temp, df_filtred, df_line, '''df_scatter''', colors
+#    del lst_speed_temp, df_filtred, df_line
 
 ##DDO
-del lst_time_pattern10, df_time, df2, df3
+#del lst_time_pattern10, df_time, df2, df3
 
