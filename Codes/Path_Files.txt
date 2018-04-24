@@ -1,0 +1,12 @@
+import os
+os.getlogin()
+
+
+If you're not sure how to find the relative path to your database directory, you could use the os.path.relpath method:
+>>> database_path = "C:\\Users\\Gabriel\\Documents\\GitHub\\Database\\TransUrb"
+>>> current_path = "C:\\Users\\Gabriel\\Documents\\GitHub\\MyCoolProject"
+>>> import os
+>>> os.path.relpath(database_path, current_path)
+'..\\Database\\TransUrb'
+
+This tells us that any script inside the MyCoolProject directory, can access the TransUrb directory, with the relative path '..\\Database\\TransUrb'

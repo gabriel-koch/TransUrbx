@@ -19,13 +19,17 @@ import numpy as np
 file_x = '001'
 
 data = pd.read_csv('C:\\Users\\Gabriel\\Documents\\GitHub\\Database\\TransUrb\\' + file_x + '.csv',      
-                   names = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude'],\
-                   dtype = {'Latitude':np.float64, 'Longitude':np.float64,\
+                   names = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude'],
+                   dtype = {'Latitude':np.float64, 'Longitude':np.float64,
                             'Linha':np.str, u'Veículo':np.str})
 #data = pd.read_csv('C:\\Users\\danielmota\\Documents\\GitHub\\Database\\TransUrb\\' + file_x + '.csv',      
-#                   names = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude'],\
-#                   dtype = {'Latitude':np.float64, 'Longitude':np.float64,\
+#                   names = ['Dia','Hora','Linha',u'Veículo','Latitude','Longitude'],
+#                   dtype = {'Latitude':np.float64, 'Longitude':np.float64,
 #                            'Linha':np.str, u'Veículo':np.str})
+
+
+stops = pd.read_csv('C:\\Users\\Gabriel\\Documents\\GitHub\\Database\\TransUrb\\stops.txt')
+stops = stops.drop(columns=['stop_id','stop_desc'])
 
 
 ##Tirar duplicadas
@@ -62,7 +66,6 @@ for i in range(24):
             m=1
 
 '''---------'''
-
 
 def haversine(lon1, lat1, lon2, lat2):        
     '''Função haversine'''
@@ -106,7 +109,7 @@ dictx = {}
 for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
       
     ##Tratando os dados
-    df_filtred = df_filtred.reset_index().groupby(['Linha', u'Veículo',\
+    df_filtred = df_filtred.reset_index().groupby(['Linha', u'Veículo',
                                        'Hora']).mean().reset_index(level=-1)
     df_filtred = df_filtred.reset_index(level=['Linha',u'Veículo'])
     df_filtred = df_filtred.set_index(['Hora'])
@@ -152,6 +155,47 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
 
     '''---------'''
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    '''---------'''
     ##Gráfico de posição
     ##Filtro para tirar a posição 0,0
 #    df_scatter = df4[(df4['Latitude'] != 0) | (df4['Longitude'] != 0)]
@@ -173,8 +217,8 @@ for (vehicle, df_filtred) in df2.groupby(u'Veículo'):
     df_line = df4.groupby('Intervalo')['Velocidade'].mean()
     df_line = df_line.reset_index()##ARRUMAR A HORA
     df_line['Intervalo'] = pd.to_datetime(df_line['Intervalo'], format = '%H:%M').dt.time
-    df_line.plot(x='Intervalo',y='Velocidade',\
-                       title = u'Velocidade média do veículo: ' + vehicle,\
+    df_line.plot(x='Intervalo',y='Velocidade',
+                       title = u'Velocidade média do veículo: ' + vehicle,
                        figsize = (14,8))
     plt.xlim(interval_xa, interval_xb)
     plt.ylim()
